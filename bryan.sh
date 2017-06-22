@@ -221,13 +221,21 @@ dots() {
 }
 
 extract() {
-    echo "$parsed" | egrep "\"$1\".*?\"$2\"" | sed -e 's/.*\t//' -e 's/^"//' -e 's/"$//'
+    echo "$parsed" | egrep "\"$1\".*?\"$2\"" | sed -e $'s/.*\t//' -e 's/^"//' -e 's/"$//'
 }
 
 EXT_ARRAY=""
 
 bio() {
     extract "bio" "$1"
+}
+
+year() {
+    seconds=$(echo "$1" | rev | cut -c 4- | rev)
+    case "$(uname)" in
+        'Darwin') echo "$(date -r $seconds "+%Y")"  ;;
+        *)        echo "$(date -d @$seconds "+%Y")" ;;
+    esac
 }
 
 # Extract and display basic bio information
@@ -283,16 +291,14 @@ starts=( $(extract "education" "startDate") )
 ends=( $(extract "education" "graduatedDate") )
 
 for i in "${!schools[@]}"; do
-    start="$(echo "${starts[i]}" | rev | cut -c 4- | rev)"
-    end="$(echo "${ends[i]}" | rev | cut -c 4- | rev)"
-    startYear=$(date -d @$start "+%Y")
-    endYear=$(date -d @$end "+%Y")
+    startYear=$(year ${starts[i]})
+    endYear=$(year ${ends[i]})
     
     cat << END
   ${schools[i]}
-    - Major: ${majors[i]}
+    - Major:  ${majors[i]}
     - Degree: ${degrees[i]}
-    - Years: $startYear - $endYear
+    - Years:  $startYear - $endYear
 
 END
 done
@@ -310,19 +316,17 @@ starts=( $(extract "job" "start") )
 ends=( $(extract "job" "end") )
 
 for i in "${!companies[@]}"; do
-    start="$(echo "${starts[i]}" | rev | cut -c 4- | rev)"
-    end="$(echo "${ends[i]}" | rev | cut -c 4- | rev)"
-    startYear=$(date -d @$start "+%Y")
-    if [[ -z "$end" ]]
+    startYear=$(year "${starts[i]}")
+    if [[ -z "${ends[i]}" ]]
     then
         endYear="Present"
     else
-        endYear=$(date -d @$end "+%Y")
+        endYear=$(year "${ends[i]}")
     fi
 
     cat << END
   ${companies[i]}
-    - Role: ${titles[i]}
+    - Role:  ${titles[i]}
     - Years: $startYear - $endYear
 
 END
