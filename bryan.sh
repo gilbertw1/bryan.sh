@@ -335,7 +335,7 @@ done
 
 # Extract and display skills
 
-printf "\nEvaluating Technological Proficienies"
+printf "\nEvaluating Technological Proficiencies"
 dots 28
 printf "\033[92mCOMPLETE\033[0m\n\n"
 
